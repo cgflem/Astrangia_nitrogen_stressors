@@ -42,6 +42,9 @@ opts_knit$set(root.dir = "C:/Users/carol/Documents/PhD Boston University 2019-/C
 getwd()
 resp_all.data <- read.csv("RESP_ALL_SUMMARY_12_8_22.csv", header=TRUE, sep=",",stringsAsFactors = FALSE)
 
+hist(resp_all.data$resp_rate)
+qqnorm(resp_all.data$resp_rate)
+
 #make sure treatID is a character
 resp_all.data$treat_ID<-as.character(resp_all.data$treat_ID)
 
@@ -67,17 +70,17 @@ resp_all.data$ordernorm_resp_rate<-orderNormobj_resp_rate$x.t
 
 
 ```{r linear models}
-mm_resp_null <- lmer(ordernorm_resp_rate ~ 1 + (1|vial_ID), data= resp_all.data)
+mm_resp_null <- lmer(resp_rate ~ 1 + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_null)
 #that null looks good
 
-mm_resp_1 <- lmer(ordernorm_resp_rate ~ N_species + N_dose + temp + food + sym_state + e_coli_plate + (1|vial_ID), data= resp_all.data)
+mm_resp_1 <- lmer(resp_rate ~ N_species + N_dose + temp + food + sym_state + e_coli_plate + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_1)
 # the factors that are not significant and I will drop: Nspecies, food
 
-mm_resp_2 <- lmer(ordernorm_resp_rate ~ N_dose + temp + sym_state + e_coli_plate + (1|vial_ID), data= resp_all.data)
+mm_resp_2 <- lmer(resp_rate ~ N_dose + + N_species + temp + sym_state + e_coli_plate + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_2)
-emm_resp_2=emmeans(mm_resp_2, specs=pairwise ~ sym_state)
+emm_resp_2=emmeans(mm_resp_2, specs=pairwise ~ N_species)
 summary(emm_resp_2)
 
 #checking out where the changes are
@@ -101,16 +104,16 @@ mean(all_e_coli$resp_rate, na.rm=TRUE)
 mean(all_no_e_coli$resp_rate, na.rm=TRUE)
 # -0.004230682
 
-mm_resp_3 <- lmer(ordernorm_resp_rate ~ N_dose  + temp + sym_state + e_coli_plate + N_dose*temp + N_dose*sym_state + sym_state*temp + (1|vial_ID), data= resp_all.data)
+mm_resp_3 <- lmer(resp_rate ~ N_dose  + temp + sym_state + e_coli_plate + N_dose*temp + N_dose*sym_state + sym_state*temp + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_3)
 
-mm_resp_4 <- lmer(ordernorm_resp_rate ~ N_dose  + temp + sym_state + e_coli_plate +  N_dose*sym_state + sym_state*temp + (1|vial_ID), data= resp_all.data)
+mm_resp_4 <- lmer(resp_rate ~ N_dose  + temp + sym_state + e_coli_plate +  N_dose*sym_state + sym_state*temp + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_4)
 
-mm_resp_5 <- lmer(ordernorm_resp_rate ~ N_dose  + temp + sym_state + e_coli_plate + sym_state*temp + (1|vial_ID), data= resp_all.data)
+mm_resp_5 <- lmer(resp_rate ~ N_dose  + temp + sym_state + e_coli_plate + sym_state*temp + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_5)
 
-mm_resp_6 <- lmer(ordernorm_resp_rate ~ N_dose  + temp + sym_state + e_coli_plate +  N_dose*sym_state + (1|vial_ID), data= resp_all.data)
+mm_resp_6 <- lmer(resp_rate ~ N_dose  + temp + sym_state + e_coli_plate +  N_dose*sym_state + (1|vial_ID), data= resp_all.data)
 summary(mm_resp_6)
 
 #AIC 
@@ -118,7 +121,10 @@ AIC_table_pam<-AIC(mm_resp_1, mm_resp_2, mm_resp_3, mm_resp_4, mm_resp_5, mm_res
 AIC_table_pam
 
 #lower AIC wins, mm_resp_2 wins
+```
 
+
+```{r linear models}
 #posthoc pairwise
 #need to change the max print because we have so many comparisons
 options(max.print = 10000)   
