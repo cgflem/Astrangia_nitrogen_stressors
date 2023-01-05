@@ -137,9 +137,31 @@ summary(mm_resp_e_coli_1)
 
 mm_resp_e_coli_2 <- lmer(resp_rate ~ N_dose  + temp + sym_state + (1|vial_ID), data= e_coli)
 summary(mm_resp_e_coli_2)
-emm_resp_e_coli_2=emmeans(mm_resp_e_coli_2, specs=pairwise ~ N_dose)
+emm_resp_e_coli_2=emmeans(mm_resp_e_coli_2, specs=pairwise ~sym_state)
 summary(emm_resp_e_coli_2)
 #go with this one
+
+mean(e_coli[e_coli$sym_state == "A","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.004370495
+
+mean(e_coli[e_coli$sym_state == "S","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.004912
+
+
+mean(e_coli[e_coli$temp == "20","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.004933947
+
+mean(e_coli[e_coli$temp == "30","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.004343118
+
+mean(e_coli[e_coli$N_dose == "0","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.004231979
+
+mean(e_coli[e_coli$N_dose == "10","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.005326042
+
+mean(e_coli[e_coli$N_dose == "18","resp_rate"], na.rm=TRUE) #calculates the mean of resp_rate in the sym_state column where values are A
+#-0.005102128
 
 ```
 
@@ -157,7 +179,7 @@ summary(mm_resp_no_e_coli_1)
 
 mm_resp_no_e_coli_2 <- lmer(resp_rate ~ N_dose  + temp + sym_state + (1|vial_ID), data= no_e_coli)
 summary(mm_resp_no_e_coli_2)
-emm_resp_no_e_coli_2=emmeans(mm_resp_no_e_coli_2, specs=pairwise ~ sym_state)
+emm_resp_no_e_coli_2=emmeans(mm_resp_no_e_coli_2, specs=pairwise ~ temp, na.rm=TRUE)
 summary(emm_resp_no_e_coli_2)
 #go with this one
 
@@ -260,7 +282,7 @@ t.test(control_all_30$resp_rate, N_18_30_e_coli$resp_rate)
 ```{r Graphs}
 #1
 gg_resp_all_ecoli<-
-  ggplot(e_coli, aes(x=treat_ID_full, y=resp_rate, color=temp)) +
+  ggplot(e_coli, aes(x=treat_ID_full, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
@@ -278,7 +300,7 @@ gg_resp_all_ecoli
 
 #2
 gg_food_sym_state_ecoli<-
-  ggplot(e_coli, aes(x=food_sym_state, y=resp_rate, color=temp)) +
+  ggplot(e_coli, aes(x=food_sym_state, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
@@ -296,7 +318,7 @@ gg_food_sym_state_ecoli
 
 #3
 gg_resp_all_no_ecoli<-
-  ggplot(no_e_coli, aes(x=treat_ID, y=resp_rate, color=temp)) +
+  ggplot(no_e_coli, aes(x=treat_ID_collapsed_controls, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
@@ -314,7 +336,7 @@ gg_resp_all_no_ecoli
 
 #4
 gg_food_sym_state_no_ecoli<-
-  ggplot(no_e_coli, aes(x=food_sym_state, y=resp_rate, color=temp)) +
+  ggplot(no_e_coli, aes(x=food_sym_state, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
@@ -333,14 +355,15 @@ gg_food_sym_state_no_ecoli
 
 #5
 gg_N_species_dose_ecoli<-
-  ggplot(e_coli, aes(x=N_species_dose, y=resp_rate, color=temp)) +
+  ggplot(e_coli, aes(x=N_species_dose, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
+  geom_label(position="jitter", label=col_num)+
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
   ylab("Respirometry rate")+
   xlab("Treat ID")+
   theme(legend.position="none", plot.title = element_text(size = 9)) +
-  #scale_color_manual(name = "Day of experiment",
+  #scale_color_manual()+
                      #labels = c("Day 1","Day 11"),
                    # values = c("royalblue","darkorchid1"))+
  # scale_x_discrete(labels=c("Day 1","Day 11")) +
@@ -348,10 +371,11 @@ gg_N_species_dose_ecoli<-
  annotate("text", x = Inf, y = Inf, label = paste("  "), vjust = 1, hjust = 1, size=3)+
   ggtitle("Resp rate by N_species_dose - E. coli")
 gg_N_species_dose_ecoli
+?geom_label
 
 #6
 gg_N_species_dose_no_ecoli<-
-  ggplot(no_e_coli, aes(x=N_species_dose, y=resp_rate, color=temp)) +
+  ggplot(no_e_coli, aes(x=N_species_dose, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
@@ -390,7 +414,7 @@ gg_temp_ecoli
 #8
 no_e_coli$temp<-as.factor(no_e_coli$temp)
 gg_temp_no_ecoli<-
-  ggplot(no_e_coli, aes(x=temp, y=resp_rate)) +
+  ggplot(no_e_coli, aes(x=temp, y=resp_rate, color=col_num)) +
   geom_boxplot(width=0.8) +
   geom_jitter(width=0.15, alpha=0.9) +
  # geom_line(aes(group=e_coli_plate), col="darkgray")+
@@ -444,5 +468,411 @@ gg_sym_state_ecoli<-
   ggtitle("Resp rate by Sym state - No E. coli")
 gg_sym_state_ecoli
 
+```
+
+```{r SUBSETS E COLI for t tests verus the control for that group}
+#ammonium high 20C
+sym_fed_ammonium_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0"& resp_all.data$e_coli_plate=="0")
+apo_fed_ammonium_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_ammonium_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_ammonium_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+#nitrate high 20C
+sym_fed_nitrate_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_fed_nitrate_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_nitrate_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_nitrate_high_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+
+#control 20C
+sym_fed_control_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_fed_control_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_control_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_control_20C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+
+#ammonium 5uM 20C
+sym_fed_ammonium_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S"& resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_fed_ammonium_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_ammonium_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_ammonium_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+#nitrate 5um 20C
+sym_fed_nitrate_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_fed_nitrate_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_nitrate_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_nitrate_5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+
+#ammonium high 30C
+sym_fed_ammonium_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_ammonium_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_ammonium_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_ammonium_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+#nitrate high 30C
+sym_fed_nitrate_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_nitrate_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_nitrate_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_nitrate_high_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+
+#control 30C
+sym_fed_control_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_control_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_control_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_control_30C_no_ecoli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+
+#ammonium 5um 30C
+sym_fed_ammonium_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_ammonium_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_ammonium_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_ammonium_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+#nitrate 5um 30C
+sym_fed_nitrate_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" &  resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_nitrate_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_nitrate_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_nitrate_5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+
+#nitrate 1.5um 30C
+sym_fed_nitrate_1.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_nitrate_1.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_nitrate_1.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_nitrate_1.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+
+#nitrate 1.5um 20C
+sym_fed_nitrate_1.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_fed_nitrate_1.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_nitrate_1.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_nitrate_1.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+
+#ammonium 7.5um 30C
+sym_fed_ammonium_7.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_fed_ammonium_7.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+sym_starved_ammonium_7.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+apo_starved_ammonium_7.5um_30C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="0")
+
+#ammonium 7.5um 20C
+sym_fed_ammonium_7.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_fed_ammonium_7.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+sym_starved_ammonium_7.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+apo_starved_ammonium_7.5um_20C_no_ecoli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="0")
+```
+
+```{r SUBSETS NO E COLI for t tests verus the control for that group}
+#ammonium high 20C
+sym_fed_ammonium_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1"& resp_all.data$e_coli_plate=="1")
+apo_fed_ammonium_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_ammonium_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_ammonium_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+#nitrate high 20C
+sym_fed_nitrate_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_fed_nitrate_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_nitrate_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_nitrate_high_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+
+#control 20C
+sym_fed_control_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_fed_control_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_control_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_control_20C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+
+#ammonium 5uM 20C
+sym_fed_ammonium_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S"& resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_fed_ammonium_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_ammonium_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_ammonium_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+#nitrate 5um 20C
+sym_fed_nitrate_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_fed_nitrate_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_nitrate_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_nitrate_5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+
+#ammonium high 30C
+sym_fed_ammonium_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_ammonium_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_ammonium_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_ammonium_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="10" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+#nitrate high 30C
+sym_fed_nitrate_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_nitrate_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_nitrate_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_nitrate_high_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="18" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+
+#control 30C
+sym_fed_control_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_control_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_control_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_control_30C_e_coli <-subset(resp_all.data, resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="0" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+
+#ammonium 5um 30C
+sym_fed_ammonium_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_ammonium_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_ammonium_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_ammonium_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+#nitrate 5um 30C
+sym_fed_nitrate_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" &  resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_nitrate_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_nitrate_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_nitrate_5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+
+#nitrate 1.5um 30C
+sym_fed_nitrate_1.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_nitrate_1.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_nitrate_1.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_nitrate_1.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+
+#nitrate 1.5um 20C
+sym_fed_nitrate_1.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_fed_nitrate_1.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_nitrate_1.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_nitrate_1.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="N" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="1.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+
+#ammonium 7.5um 30C
+sym_fed_ammonium_7.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_fed_ammonium_7.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+sym_starved_ammonium_7.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+apo_starved_ammonium_7.5um_30C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="30"& resp_all.data$e_coli_plate=="1")
+
+#ammonium 7.5um 20C
+sym_fed_ammonium_7.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_fed_ammonium_7.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="F" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+sym_starved_ammonium_7.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="S" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+apo_starved_ammonium_7.5um_20C_e_coli <-subset(resp_all.data, resp_all.data$N_species=="A" & resp_all.data$sym_state=="A" & resp_all.data$food=="S" & resp_all.data$N_dose=="7.5" & resp_all.data$temp=="20"& resp_all.data$e_coli_plate=="1")
+```
+
+```{r t tests compared to relevant control - E. coli}
+#sym fed 20C, all compared to control sym fed 20C
+t.test(sym_fed_control_20C_e_coli$resp_rate, sym_fed_nitrate_1.5um_20C_e_coli$resp_rate)
+#p=0.1042
+t.test(sym_fed_control_20C_e_coli$resp_rate, sym_fed_ammonium_5um_20C_e_coli$resp_rate)
+#p=0.4771
+t.test(sym_fed_control_20C_e_coli$resp_rate, sym_fed_nitrate_5um_20C_e_coli$resp_rate)
+#p=0.5502
+t.test(sym_fed_control_20C_e_coli$resp_rate, sym_fed_ammonium_7.5um_20C_e_coli$resp_rate)
+#p=0.232
+t.test(sym_fed_control_20C_e_coli$resp_rate, sym_fed_ammonium_high_20C_e_coli$resp_rate)
+#p=0.2024
+t.test(sym_fed_control_20C_e_coli$resp_rate, sym_fed_nitrate_high_20C_e_coli$resp_rate)
+#p=0.1682
+
+#sym fed 30C, all compared to control sym fed 30C
+t.test(sym_fed_control_30C_e_coli$resp_rate, sym_fed_nitrate_1.5um_30C_e_coli$resp_rate)
+#p=0.4524
+t.test(sym_fed_control_30C_e_coli$resp_rate, sym_fed_ammonium_5um_30C_e_coli$resp_rate)
+#p=0.6342
+t.test(sym_fed_control_30C_e_coli$resp_rate, sym_fed_nitrate_5um_30C_e_coli$resp_rate)
+#p=0.96
+t.test(sym_fed_control_30C_e_coli$resp_rate, sym_fed_ammonium_7.5um_30C_e_coli$resp_rate)
+#p=0.0127
+t.test(sym_fed_control_30C_e_coli$resp_rate, sym_fed_ammonium_high_30C_e_coli$resp_rate)
+#p=0.1383
+t.test(sym_fed_control_30C_e_coli$resp_rate, sym_fed_nitrate_high_30C_e_coli$resp_rate)
+#p=0.7563
+
+#___ Sym starved 
+
+#sym starved 20C, all compared to control sym fed 20C
+t.test(sym_starved_control_20C_e_coli$resp_rate, sym_starved_nitrate_1.5um_20C_e_coli$resp_rate)
+#p=0.0556
+t.test(sym_starved_control_20C_e_coli$resp_rate, sym_starved_ammonium_5um_20C_e_coli$resp_rate)
+#p= 0.1202
+t.test(sym_starved_control_20C_e_coli$resp_rate, sym_starved_nitrate_5um_20C_e_coli$resp_rate)
+#p= 0.7142
+t.test(sym_starved_control_20C_e_coli$resp_rate, sym_starved_ammonium_7.5um_20C_e_coli$resp_rate)
+#p= 0.3707
+t.test(sym_starved_control_20C_e_coli$resp_rate, sym_starved_ammonium_high_20C_e_coli$resp_rate)
+#p= 0.4604
+t.test(sym_starved_control_20C_e_coli$resp_rate, sym_starved_nitrate_high_20C_e_coli$resp_rate)
+#p= 0.7019
+
+#sym starved 30C, all compared to control sym fed 30C
+t.test(sym_starved_control_30C_e_coli$resp_rate, sym_starved_nitrate_1.5um_30C_e_coli$resp_rate)
+#p=0.1613
+t.test(sym_starved_control_30C_e_coli$resp_rate, sym_starved_ammonium_5um_30C_e_coli$resp_rate)
+#p=0.6113
+t.test(sym_starved_control_30C_e_coli$resp_rate, sym_starved_nitrate_5um_30C_e_coli$resp_rate)
+#p=0.9276
+t.test(sym_starved_control_30C_e_coli$resp_rate, sym_starved_ammonium_7.5um_30C_e_coli$resp_rate)
+#p= 0.05253
+t.test(sym_starved_control_30C_e_coli$resp_rate, sym_starved_ammonium_high_30C_e_coli$resp_rate)
+#p= 0.6491
+t.test(sym_starved_control_30C_e_coli$resp_rate, sym_starved_nitrate_high_30C_e_coli$resp_rate)
+#p= 0.1142
+
+#___ apo fed 
+
+#apo fed 20C
+t.test(apo_fed_control_20C_e_coli$resp_rate, apo_fed_nitrate_1.5um_20C_e_coli$resp_rate)
+#p= 0.4355
+t.test(apo_fed_control_20C_e_coli$resp_rate, apo_fed_ammonium_5um_20C_e_coli$resp_rate)
+#p= 0.6995
+t.test(apo_fed_control_20C_e_coli$resp_rate, apo_fed_nitrate_5um_20C_e_coli$resp_rate)
+#p= 0.9564
+t.test(apo_fed_control_20C_e_coli$resp_rate, apo_fed_ammonium_7.5um_20C_e_coli$resp_rate)
+#p= 0.6399
+t.test(apo_fed_control_20C_e_coli$resp_rate, apo_fed_ammonium_high_20C_e_coli$resp_rate)
+#p= 0.4461
+t.test(apo_fed_control_20C_e_coli$resp_rate, apo_fed_nitrate_high_20C_e_coli$resp_rate)
+#p= 0.3519
+
+#apo fed 30C
+t.test(apo_fed_control_30C_e_coli$resp_rate, apo_fed_nitrate_1.5um_30C_e_coli$resp_rate)
+#p=0.5267
+t.test(apo_fed_control_30C_e_coli$resp_rate, apo_fed_ammonium_5um_30C_e_coli$resp_rate)
+#p=0.4213
+t.test(apo_fed_control_30C_e_coli$resp_rate, apo_fed_nitrate_5um_30C_e_coli$resp_rate)
+#p=0.5673
+t.test(apo_fed_control_30C_e_coli$resp_rate, apo_fed_ammonium_7.5um_30C_e_coli$resp_rate)
+#p= 0.3054
+t.test(apo_fed_control_30C_e_coli$resp_rate, apo_fed_ammonium_high_30C_e_coli$resp_rate)
+#p= 0.4159
+t.test(apo_fed_control_30C_e_coli$resp_rate, apo_fed_nitrate_high_30C_e_coli$resp_rate)
+#p= 0.04549
+
+#___ apo starved
+
+#apo fed 20C
+t.test(apo_starved_control_20C_e_coli$resp_rate, apo_starved_nitrate_1.5um_20C_e_coli$resp_rate)
+#p= 0.748
+t.test(apo_starved_control_20C_e_coli$resp_rate, apo_starved_ammonium_5um_20C_e_coli$resp_rate)
+#p= 0.9562
+t.test(apo_starved_control_20C_e_coli$resp_rate, apo_starved_nitrate_5um_20C_e_coli$resp_rate)
+#p=0.08441
+t.test(apo_starved_control_20C_e_coli$resp_rate, apo_starved_ammonium_7.5um_20C_e_coli$resp_rate)
+#p= 0.7132
+t.test(apo_starved_control_20C_e_coli$resp_rate, apo_starved_ammonium_high_20C_e_coli$resp_rate)
+#p=0.1955
+t.test(apo_starved_control_20C_e_coli$resp_rate, apo_starved_nitrate_high_20C_e_coli$resp_rate)
+#p= 0.06472
+
+#apo fed 30C
+t.test(apo_starved_control_30C_e_coli$resp_rate, apo_starved_nitrate_1.5um_30C_e_coli$resp_rate)
+#p= 0.3879
+t.test(apo_starved_control_30C_e_coli$resp_rate, apo_starved_ammonium_5um_30C_e_coli$resp_rate)
+#p= 0.714
+t.test(apo_starved_control_30C_e_coli$resp_rate, apo_starved_nitrate_5um_30C_e_coli$resp_rate)
+#p= 0.2444
+t.test(apo_starved_control_30C_e_coli$resp_rate, apo_starved_ammonium_7.5um_30C_e_coli$resp_rate)
+#p= 0.9543
+t.test(apo_starved_control_30C_e_coli$resp_rate, apo_starved_ammonium_high_30C_e_coli$resp_rate)
+#p= 0.2142
+t.test(apo_starved_control_30C_e_coli$resp_rate, apo_starved_nitrate_high_30C_e_coli$resp_rate)
+#p= 0.1545
+
+
+```
+```{r t tests No e coli}
+#TO DO JANUARY 5
+#sym fed 20C, all compared to control sym fed 20C
+t.test(sym_fed_control_20C_no_e_coli$resp_rate, sym_fed_nitrate_1.5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_20C_no_e_coli$resp_rate, sym_fed_ammonium_5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_20C_no_e_coli$resp_rate, sym_fed_nitrate_5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_20C_no_e_coli$resp_rate, sym_fed_ammonium_7.5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_20C_no_e_coli$resp_rate, sym_fed_ammonium_high_20C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_20C_no_e_coli$resp_rate, sym_fed_nitrate_high_20C_no_e_coli$resp_rate)
+#p=
+
+#sym fed 30C, all compared to control sym fed 30C
+t.test(sym_fed_control_30C_no_e_coli$resp_rate, sym_fed_nitrate_1.5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_30C_no_e_coli$resp_rate, sym_fed_ammonium_5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_30C_no_e_coli$resp_rate, sym_fed_nitrate_5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_30C_no_e_coli$resp_rate, sym_fed_ammonium_7.5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_30C_no_e_coli$resp_rate, sym_fed_ammonium_high_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_fed_control_30C_no_e_coli$resp_rate, sym_fed_nitrate_high_30C_no_e_coli$resp_rate)
+#p=
+
+#___ Sym starved 
+
+#sym starved 20C, all compared to control sym fed 20C
+t.test(sym_starved_control_20C_no_e_coli$resp_rate, sym_starved_nitrate_1.5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(sym_starved_control_20C_no_e_coli$resp_rate, sym_starved_ammonium_5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(sym_starved_control_20C_no_e_coli$resp_rate, sym_starved_nitrate_5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(sym_starved_control_20C_no_e_coli$resp_rate, sym_starved_ammonium_7.5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(sym_starved_control_20C_no_e_coli$resp_rate, sym_starved_ammonium_high_20C_no_e_coli$resp_rate)
+#p= 
+t.test(sym_starved_control_20C_no_e_coli$resp_rate, sym_starved_nitrate_high_20C_no_e_coli$resp_rate)
+#p= 
+
+#sym starved 30C, all compared to control sym fed 30C
+t.test(sym_starved_control_30C_no_e_coli$resp_rate, sym_starved_nitrate_1.5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_starved_control_30C_no_e_coli$resp_rate, sym_starved_ammonium_5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_starved_control_30C_no_e_coli$resp_rate, sym_starved_nitrate_5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(sym_starved_control_30C_no_e_coli$resp_rate, sym_starved_ammonium_7.5um_30C_no_e_coli$resp_rate)
+#p= 
+t.test(sym_starved_control_30C_no_e_coli$resp_rate, sym_starved_ammonium_high_30C_no_e_coli$resp_rate)
+#p= 
+t.test(sym_starved_control_30C_no_e_coli$resp_rate, sym_starved_nitrate_high_30C_no_e_coli$resp_rate)
+#p=
+
+#___ apo fed 
+
+#apo fed 20C
+t.test(apo_fed_control_20C_no_e_coli$resp_rate, apo_fed_nitrate_1.5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_20C_no_e_coli$resp_rate, apo_fed_ammonium_5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_20C_no_e_coli$resp_rate, apo_fed_nitrate_5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_20C_no_e_coli$resp_rate, apo_fed_ammonium_7.5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_20C_no_e_coli$resp_rate, apo_fed_ammonium_high_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_20C_no_e_coli$resp_rate, apo_fed_nitrate_high_20C_no_e_coli$resp_rate)
+#p= 
+
+#apo fed 30C
+t.test(apo_fed_control_30C_no_e_coli$resp_rate, apo_fed_nitrate_1.5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(apo_fed_control_30C_no_e_coli$resp_rate, apo_fed_ammonium_5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(apo_fed_control_30C_no_e_coli$resp_rate, apo_fed_nitrate_5um_30C_no_e_coli$resp_rate)
+#p=
+t.test(apo_fed_control_30C_no_e_coli$resp_rate, apo_fed_ammonium_7.5um_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_30C_no_e_coli$resp_rate, apo_fed_ammonium_high_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_fed_control_30C_no_e_coli$resp_rate, apo_fed_nitrate_high_30C_no_e_coli$resp_rate)
+#p= 
+
+#___ apo starved
+
+#apo fed 20C
+t.test(apo_starved_control_20C_no_e_coli$resp_rate, apo_starved_nitrate_1.5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_20C_no_e_coli$resp_rate, apo_starved_ammonium_5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(apo_starved_control_20C_no_e_coli$resp_rate, apo_starved_nitrate_5um_20C_no_e_coli$resp_rate)
+#p=
+t.test(apo_starved_control_20C_no_e_coli$resp_rate, apo_starved_ammonium_7.5um_20C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_20C_no_e_coli$resp_rate, apo_starved_ammonium_high_20C_no_e_coli$resp_rate)
+#p=
+t.test(apo_starved_control_20C_no_e_coli$resp_rate, apo_starved_nitrate_high_20C_no_e_coli$resp_rate)
+#p= 
+
+#apo fed 30C
+t.test(apo_starved_control_30C_no_e_coli$resp_rate, apo_starved_nitrate_1.5um_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_30C_no_e_coli$resp_rate, apo_starved_ammonium_5um_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_30C_no_e_coli$resp_rate, apo_starved_nitrate_5um_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_30C_no_e_coli$resp_rate, apo_starved_ammonium_7.5um_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_30C_no_e_coli$resp_rate, apo_starved_ammonium_high_30C_no_e_coli$resp_rate)
+#p= 
+t.test(apo_starved_control_30C_no_e_coli$resp_rate, apo_starved_nitrate_high_30C_no_e_coli$resp_rate)
+#p=
 ```
 

@@ -1775,7 +1775,25 @@ gg_apo_starved_ammonium_7.5um_20C<-
 gg_apo_starved_ammonium_7.5um_20C
 ```
 
+```{r Comparing delta PAM for datasets that where control sigificantly changed}
+#Sym fed
+t.test(sym_fed_control_20C$PAM_delta, sym_fed_ammonium_5um_20C$PAM_delta, paired=FALSE) 
+#p = 0.9777, the difference in PAM from day 1 to 11 is NOT significantly different for control vs. A 5uM 
+#Sym Starved
+t.test(sym_starved_control_20C$PAM_delta, sym_starved_nitrate_1.5um_20C$PAM_delta)
+#p = 0.8655, the difference in PAM from day 1 to 11 is NOT significantly different for control vs. N 1.5uM
+t.test(sym_starved_control_20C$PAM_delta, sym_starved_nitrate_5um_20C$PAM_delta)
+#p = 0.7976, the difference in PAM from day 1 to 11 is NOT significantly different for control vs. N 5uM
+t.test(sym_starved_control_20C$PAM_delta, sym_starved_ammonium_high_20C$PAM_delta)
+#p = 0.5778, the difference in PAM from day 1 to 11 is NOT significantly different for control vs. A 10uM
+t.test(sym_starved_control_20C$PAM_delta, sym_starved_ammonium_5um_20C$PAM_delta)
+#p = 0.5423, the difference in PAM from day 1 to 11 is NOT significantly different for control vs. A 5uM
+t.test(sym_starved_control_20C$PAM_delta, sym_starved_ammonium_7.5um_20C$PAM_delta)
+#p = 0.2288, the difference in PAM from day 1 to 11 is NOT significantly different for control vs. A 7.5uM
 
+#playing around with some other t tests
+t.test(sym_starved_ammonium_high_20C$PAM_delta, sym_starved_ammonium_7.5um_20C$PAM_delta)
+```
 
 
 
@@ -1957,6 +1975,7 @@ pam_plot_treatment
 
 
 ```
+
 
 
 
